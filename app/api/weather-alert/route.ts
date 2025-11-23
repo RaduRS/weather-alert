@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { renderWeatherAlertEmail } from "@/lib/emailTemplates/weatherAlert";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -101,14 +102,26 @@ export async function GET(request: Request) {
           { status: 500 }
         );
       }
-      const subject = "Weather Alert: Frost or Snow Risk Tonight";
-      const text = `Alert!\n${hasSnow ? "Snow expected tonight\n" : ""}${hasLowTemp ? `Temperature at or below 5°C${lowTemp !== null ? ` (low: ${lowTemp}°C)` : ""}\n` : ""}${hasBelowFreezing ? "Air temperature at/under 0°C\n" : ""}${hasFreezingPrecip ? "Precipitation near freezing (possible ice)\n" : ""}${hasRadiativeFrost ? "Frost risk with clear/calm, humid conditions\n" : ""}`;
+      const email = renderWeatherAlertEmail({
+        locationName: "Eastwood, Nottinghamshire",
+        lat: LAT,
+        lon: LON,
+        timezone: TZ,
+        windowLabel: "20:00–06:00",
+        recipient: toAddress,
+        lowTemp,
+        hasSnow,
+        hasLowTemp,
+        hasBelowFreezing,
+        hasFreezingPrecip,
+        hasRadiativeFrost,
+      });
       await resend.emails.send({
         from: fromAddress,
         to: [toAddress],
-        subject,
-        html: `<strong>Alert!</strong><br/>${hasSnow ? "Snow expected tonight<br/>" : ""}${hasLowTemp ? `Temperature at or below 5°C${lowTemp !== null ? ` (low: ${lowTemp}°C)` : ""}<br/>` : ""}${hasBelowFreezing ? "Air temperature at/under 0°C<br/>" : ""}${hasFreezingPrecip ? "Precipitation near freezing (possible ice)<br/>" : ""}${hasRadiativeFrost ? "Frost risk with clear/calm, humid conditions<br/>" : ""}`,
-        text,
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
         replyTo: toAddress,
       });
     }
