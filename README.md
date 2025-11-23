@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+What we're building: A simple weather alert app that automatically sends an email every evening if it's going to snow or drop below 5°C overnight.
 
-## Getting Started
+Tech stack:
 
-First, run the development server:
+Next.js app deployed to Vercel (free Hobby plan)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Open-Meteo API for weather data (completely free, no API key needed)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Resend for sending emails (3,000 free emails/month)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Vercel Cron Jobs to check weather daily around 7pm UTC (free on Hobby plan)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+How it works:
 
-## Learn More
+Vercel cron job triggers once daily between 7:00pm-7:59pm UTC (imprecise timing on free plan)
 
-To learn more about Next.js, take a look at the following resources:
+Checks Open-Meteo API for tonight's temperature and snowfall
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If snow or temp below 5°C detected, sends email alert via Resend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Zero ongoing costs - completely free to run
 
-## Deploy on Vercel
+Files needed:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+vercel.json - defines the cron schedule ("0 19 * * *" = 7pm UTC daily)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+/app/api/weather-alert/route.ts - API endpoint that checks weather and sends email
+
+.env.local - stores Resend API key
+
+Limitations on free plan: 2 cron jobs max, once-per-day scheduling, imprecise timing (runs anywhere within the hour specified).
+
+
+
+posible code spinnets
+
+{
+  "crons": [
+    {
+      "path": "/api/weather-alert",
+      "schedule": "0 19 * * *"
+    }
+  ]
+}
+
+
+
+api import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function GET() {
+  try {
+    // Fetch tonight's weather (Open-Meteo API - no key needed)
+    const response = await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&hourly=temperature_2m,snowfall&forecast_days=1&timezone=Europe/London'
+    );
+    const weather = await response.json();
+    
+    // Check tonight's hours (e.g., 20:00 to 06:00)
+    const tonight = weather.hourly.temperature_2m.slice(20, 30);
+    const snowfall = weather.hourly.snowfall.slice(20, 30);
+    
+    const hasSnow = snowfall.some((s: number) => s > 0);
+    const hasLowTemp = tonight.some((t: number) => t < 5);
+    
+    if (hasSnow || hasLowTemp) {
+      await resend.emails.send({
+        from: 'Weather Alert <onboarding@resend.dev>',
+        to: ['rsrusu90@gmail.com'],
+        subject: '⚠️ Weather Alert: Cold/Snow Tonight',
+        html: `<strong>Alert!</strong><br/>
+               ${hasSnow ? '🌨️ Snow expected tonight<br/>' : ''}
+               ${hasLowTemp ? `🥶 Temperature dropping below 5°C (low: ${Math.min(...tonight)}°C)` : ''}`
+      });
+    }
+    
+    return Response.json({ checked: true });
+  } catch (error) {
+    return Response.json({ error: String(error) }, { status: 500 });
+  }
+}
