@@ -33,27 +33,27 @@ export function renderWeatherAlertEmail(data: WeatherAlertData) {
         <td style="padding:20px 24px">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;border-spacing:0 8px">
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#374151"></span>Low Temp</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#374151;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Low Temp</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${data.lowTemp ?? "-"}°C</strong></td>
             </tr>
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6"></span>Snow Expected</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b82f6;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Snow Expected</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasSnow)}</strong></td>
             </tr>
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444"></span>Temp ≤ 5°C</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Temp ≤ 5°C</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasLowTemp)}</strong></td>
             </tr>
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea5e9"></span>Air ≤ 0°C</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea5e9;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Air ≤ 0°C</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasBelowFreezing)}</strong></td>
             </tr>
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e"></span>Freezing Precip</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Freezing Precip</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasFreezingPrecip)}</strong></td>
             </tr>
             <tr>
-              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%"><span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a855f7"></span>Radiative Frost</span></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a855f7;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Radiative Frost</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasRadiativeFrost)}</strong></td>
             </tr>
           </table>
