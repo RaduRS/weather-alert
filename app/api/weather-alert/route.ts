@@ -94,11 +94,22 @@ export async function GET(request: Request) {
           { status: 500 }
         );
       }
+      const fromAddress = process.env.FROM_EMAIL;
+      if (!fromAddress) {
+        return Response.json(
+          { error: "FROM_EMAIL not configured" },
+          { status: 500 }
+        );
+      }
+      const subject = "Weather Alert: Frost or Snow Risk Tonight";
+      const text = `Alert!\n${hasSnow ? "Snow expected tonight\n" : ""}${hasLowTemp ? `Temperature at or below 5°C${lowTemp !== null ? ` (low: ${lowTemp}°C)` : ""}\n` : ""}${hasBelowFreezing ? "Air temperature at/under 0°C\n" : ""}${hasFreezingPrecip ? "Precipitation near freezing (possible ice)\n" : ""}${hasRadiativeFrost ? "Frost risk with clear/calm, humid conditions\n" : ""}`;
       await resend.emails.send({
-        from: "Weather Alert <onboarding@resend.dev>",
+        from: fromAddress,
         to: [toAddress],
-        subject: "⚠️ Weather Alert: Frost/Snow Risk Tonight",
-        html: `<strong>Alert!</strong><br/>${hasSnow ? "🌨️ Snow expected tonight<br/>" : ""}${hasLowTemp ? `🥶 Temperature at or below 5°C${lowTemp !== null ? ` (low: ${lowTemp}°C)` : ""}<br/>` : ""}${hasBelowFreezing ? "🧊 Air temperature at/under 0°C<br/>" : ""}${hasFreezingPrecip ? "🌧️ Precipitation near freezing (possible ice)<br/>" : ""}${hasRadiativeFrost ? "❄️ Frost risk with clear/calm, humid conditions<br/>" : ""}`,
+        subject,
+        html: `<strong>Alert!</strong><br/>${hasSnow ? "Snow expected tonight<br/>" : ""}${hasLowTemp ? `Temperature at or below 5°C${lowTemp !== null ? ` (low: ${lowTemp}°C)` : ""}<br/>` : ""}${hasBelowFreezing ? "Air temperature at/under 0°C<br/>" : ""}${hasFreezingPrecip ? "Precipitation near freezing (possible ice)<br/>" : ""}${hasRadiativeFrost ? "Frost risk with clear/calm, humid conditions<br/>" : ""}`,
+        text,
+        replyTo: toAddress,
       });
     }
 
