@@ -15,6 +15,23 @@ export default function Home() {
   const [result, setResult] = useState<WeatherCheckResponse | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const IconThermometer = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M14 14.76V5a2 2 0 10-4 0v9.76a4 4 0 104 0z" stroke="#6b7280" strokeWidth="1.5" />
+      <path d="M10 9h4" stroke="#6b7280" strokeWidth="1.5" />
+    </svg>
+  );
+  const IconSnowflake = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M12 3v18M3 12h18M5 7l14 10M19 7L5 17" stroke="#6b7280" strokeWidth="1.5" />
+    </svg>
+  );
+  const IconFrost = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M12 3l3 5 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1 3-5z" stroke="#6b7280" strokeWidth="1.5" />
+    </svg>
+  );
+
   const callEndpoint = async (force: boolean) => {
     try {
       setLoading(true);
@@ -75,21 +92,19 @@ export default function Home() {
           {result && !result.error && (
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
               <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-                <div className="text-zinc-500 dark:text-zinc-400">Snow</div>
+                <div className="text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-2"><IconSnowflake /> Snow</div>
                 <div className="font-medium text-zinc-900 dark:text-zinc-100">
                   {String(result.snow ?? false)}
                 </div>
               </div>
               <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-                <div className="text-zinc-500 dark:text-zinc-400">Low Temp</div>
+                <div className="text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-2"><IconThermometer /> Low Temp</div>
                 <div className="font-medium text-zinc-900 dark:text-zinc-100">
                   {result.lowTemp ?? "-"}°C
                 </div>
               </div>
               <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-                <div className="text-zinc-500 dark:text-zinc-400">
-                  Frost Risk
-                </div>
+                <div className="text-zinc-500 dark:text-zinc-400 inline-flex items-center gap-2"><IconFrost /> Frost Risk</div>
                 <div className="font-medium text-zinc-900 dark:text-zinc-100">
                   {String(result.frostRisk ?? false)}
                 </div>
