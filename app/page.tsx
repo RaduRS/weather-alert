@@ -18,10 +18,23 @@ type WeatherCheckResponse = {
   error?: string;
 };
 
+type PrecipItem = {
+  time: string;
+  precip: number;
+  prob: number;
+};
+type PrecipitationResponse = {
+  items: PrecipItem[];
+  error?: string;
+};
+
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<WeatherCheckResponse | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [precipLoading, setPrecipLoading] = useState(false);
+  const [precipError, setPrecipError] = useState<string | null>(null);
+  const [precip, setPrecip] = useState<PrecipItem[] | null>(null);
 
   const callEndpoint = async () => {
     try {
@@ -45,6 +58,28 @@ export default function Home() {
       setMessage("Request failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPrecipitation = async () => {
+    try {
+      setPrecipLoading(true);
+      setPrecipError(null);
+      setPrecip(null);
+      const res = await fetch(`/api/precipitation`, {
+        method: "GET",
+        cache: "no-store",
+      });
+      const data = (await res.json()) as PrecipitationResponse;
+      if (data.error) {
+        setPrecipError(String(data.error));
+      } else {
+        setPrecip(data.items ?? []);
+      }
+    } catch {
+      setPrecipError("Failed to load precipitation");
+    } finally {
+      setPrecipLoading(false);
     }
   };
 
@@ -186,6 +221,69 @@ export default function Home() {
               </div>
             </div>
           )}
+          <div className="mt-8 rounded-2xl bg-white/80 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="inline-flex items-center gap-3 text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+                <CloudSnow className="w-4 h-4" /> Hourly Precipitation
+              </div>
+              <button
+                onClick={fetchPrecipitation}
+                disabled={precipLoading}
+                className="inline-flex items-center justify-center rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-800 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-50"
+              >
+                {precipLoading ? "Loading..." : "Get Precipitation"}
+              </button>
+            </div>
+            {precipError && (
+              <div className="text-xs text-red-600 dark:text-red-300">
+                {precipError}
+              </div>
+            )}
+            {precip && precip.length > 0 && (
+              <div className="relative">
+                <div className="mb-3 text-xs text-zinc-700 dark:text-zinc-300">
+                  Precipitation chance by hour (next 24h)
+                </div>
+                <div className="overflow-x-auto">
+                  <div className="min-w-[864px] sm:min-w-[960px]">
+                    <div className="flex gap-1 sm:gap-2">
+                      {(() => {
+                        return precip.map((p, idx) => {
+                          const heightPct = Math.min(100, Math.max(0, p.prob));
+                          const hour = p.time.slice(11, 13);
+                          return (
+                            <div
+                              key={idx}
+                              className="flex flex-col items-center w-8 sm:flex-1"
+                            >
+                              <div className="h-4 sm:h-5 flex items-center justify-center text-[10px] font-semibold text-zinc-700 dark:text-zinc-200">
+                                {Math.round(p.prob)}%
+                              </div>
+                              <div className="h-32 w-full flex items-end">
+                                <div
+                                  className="w-full rounded-md bg-linear-to-t from-cyan-500 to-blue-500"
+                                  style={{ height: `${heightPct}%` }}
+                                  title={`${hour} · ${Math.round(p.prob)}%`}
+                                />
+                              </div>
+                              <div className="h-4 sm:h-5 mt-1 flex items-center justify-center text-[10px] text-zinc-600 dark:text-zinc-300">
+                                {hour}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {!precip && !precipLoading && !precipError && (
+              <div className="text-xs text-zinc-600 dark:text-zinc-300">
+                Press the button to load the next 24 hours.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -82,14 +82,25 @@ export async function GET(request: Request) {
       hasSnow || hasBelowFreezing || hasFreezingPrecip || hasRadiativeFrost;
     const lowTemp = selTemps.length ? Math.min(...selTemps) : null;
 
+    const coverAdvice = (() => {
+      if (hasSnow || hasBelowFreezing || hasFreezingPrecip || hasRadiativeFrost)
+        return "Cover";
+      if (hasLowTemp) return "Consider Cover";
+      return "No Cover Needed";
+    })();
+
     const urlObj = new URL(request.url);
     const forceParam = urlObj.searchParams.get("force");
     const force = forceParam === "1" || forceParam === "true";
     const shouldSend = force || hasSnow || hasLowTemp || frostRisk;
 
     if (shouldSend) {
-      const toAddress = process.env.EMAIL_ADDRESS;
-      if (!toAddress) {
+      const rawAddresses = process.env.EMAIL_ADDRESS ?? "";
+      const toAddresses = rawAddresses
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      if (toAddresses.length === 0) {
         return Response.json(
           { error: "EMAIL_ADDRESS not configured" },
           { status: 500 }
@@ -108,21 +119,22 @@ export async function GET(request: Request) {
         lon: LON,
         timezone: TZ,
         windowLabel: "20:00–06:00",
-        recipient: toAddress,
+        recipient: toAddresses.join(", "),
         lowTemp,
         hasSnow,
         hasLowTemp,
         hasBelowFreezing,
         hasFreezingPrecip,
         hasRadiativeFrost,
+        coverAdvice,
       });
       await resend.emails.send({
         from: fromAddress,
-        to: [toAddress],
+        to: toAddresses,
         subject: email.subject,
         html: email.html,
         text: email.text,
-        replyTo: toAddress,
+        replyTo: toAddresses[0],
       });
     }
 

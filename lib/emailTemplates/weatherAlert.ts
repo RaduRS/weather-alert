@@ -11,6 +11,7 @@ type WeatherAlertData = {
   hasBelowFreezing: boolean;
   hasFreezingPrecip: boolean;
   hasRadiativeFrost: boolean;
+  coverAdvice: string;
 };
 
 function yesNo(v: boolean) {
@@ -18,15 +19,24 @@ function yesNo(v: boolean) {
 }
 
 export function renderWeatherAlertEmail(data: WeatherAlertData) {
-  const subject = "Weather Alert: Frost or Snow Risk Tonight";
-  const text = `Weather Alert\nLow Temp: ${data.lowTemp ?? "-"}°C\nSnow Expected: ${yesNo(data.hasSnow)}\nTemp ≤ 5°C: ${yesNo(data.hasLowTemp)}\nAir ≤ 0°C: ${yesNo(data.hasBelowFreezing)}\nFreezing Precip: ${yesNo(data.hasFreezingPrecip)}\nRadiative Frost: ${yesNo(data.hasRadiativeFrost)}`;
+  const headlineParts: string[] = [];
+  if (data.hasSnow) headlineParts.push("Snow Expected");
+  if (data.hasBelowFreezing || data.hasFreezingPrecip || data.hasRadiativeFrost) {
+    headlineParts.push("Frost Risk");
+  } else if (data.hasLowTemp) {
+    headlineParts.push("Chilly Night");
+  }
+  const lowPart = data.lowTemp != null ? `Low ${data.lowTemp}°C` : "";
+  const base = headlineParts.length ? headlineParts.join(" · ") : "Weather Check";
+  const subject = lowPart ? `${base} · ${lowPart}` : base;
+  const text = `Weather Alert\n${subject}\nLow Temp: ${data.lowTemp ?? "-"}°C\nSnow Expected: ${yesNo(data.hasSnow)}\nTemp ≤ 5°C: ${yesNo(data.hasLowTemp)}\nAir ≤ 0°C: ${yesNo(data.hasBelowFreezing)}\nFreezing Precip: ${yesNo(data.hasFreezingPrecip)}\nRadiative Frost: ${yesNo(data.hasRadiativeFrost)}\nCover Car?: ${data.coverAdvice}`;
   const html = `
   <div style="background:#f6f8fb;padding:24px;color:#111;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb">
       <tr>
         <td style="padding:20px 24px;border-bottom:1px solid #e5e7eb">
-          <div style="font-size:18px;font-weight:600;color:#111">Weather Alert</div>
-          <div style="font-size:13px;color:#6b7280">Frost or Snow Risk Tonight</div>
+          <div style="font-size:18px;font-weight:600;color:#111">${subject}</div>
+          <div style="font-size:13px;color:#6b7280">Tonight's conditions</div>
         </td>
       </tr>
       <tr>
@@ -55,6 +65,10 @@ export function renderWeatherAlertEmail(data: WeatherAlertData) {
             <tr>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#a855f7;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Radiative Frost</td></tr></table></td>
               <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${yesNo(data.hasRadiativeFrost)}</strong></td>
+            </tr>
+            <tr>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px;width:50%;vertical-align:middle"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td style="padding:0;vertical-align:middle"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#14b8a6;margin-right:8px"></span></td><td style="padding:0;vertical-align:middle;font-size:14px;color:#374151">Cover Car?</td></tr></table></td>
+              <td style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px"><strong>${data.coverAdvice}</strong></td>
             </tr>
           </table>
           <div style="margin-top:16px;font-size:13px;color:#6b7280">You are receiving this because your alert thresholds were met.</div>
